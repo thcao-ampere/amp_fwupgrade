@@ -7,9 +7,9 @@ include $(TOPDIR)/src/include/defaults.mk
 
 LIBTARGETS=libefivar.so libefiboot.so
 STATICLIBTARGETS=libefivar.a libefiboot.a
-BINTARGETS=efivar thread-test
-STATICBINTARGETS=efivar-static
-PCTARGETS=efivar.pc efiboot.pc
+BINTARGETS=efivar amp_fwupgrade thread-test
+STATICBINTARGETS=efivar-static amp_fwupgrade-static
+PCTARGETS=efivar.pc amp_fwupgrade.pc efiboot.pc
 TARGETS=$(LIBTARGETS) $(BINTARGETS) $(PCTARGETS)
 STATICTARGETS=$(STATICLIBTARGETS) $(STATICBINTARGETS)
 
@@ -21,10 +21,11 @@ LIBEFIVAR_SOURCES = crc32.c dp.c dp-acpi.c dp-hw.c dp-media.c dp-message.c \
 	lib.c vars.c
 LIBEFIVAR_OBJECTS = $(patsubst %.S,%.o,$(patsubst %.c,%.o,$(LIBEFIVAR_SOURCES)))
 EFIVAR_SOURCES = efivar.c
+AMP_FWUPGRADE_SOURCES = amp_fwupgrade.c
 GENERATED_SOURCES = include/efivar/efivar-guids.h guid-symbols.c
 MAKEGUIDS_SOURCES = makeguids.c guid.c
 ALL_SOURCES=$(LIBEFIBOOT_SOURCES) $(LIBEFIVAR_SOURCES) $(MAKEGUIDS_SOURCES) \
-	$(sort $(wildcard include/efivar/*.h)) $(GENERATED_SOURCES) $(EFIVAR_SOURCES)
+	$(sort $(wildcard include/efivar/*.h)) $(GENERATED_SOURCES) $(EFIVAR_SOURCES) $(AMP_FWUPGRADE_SOURCES)
 
 $(call deps-of,$(ALL_SOURCES)) : | deps
 -include $(call deps-of,$(ALL_SOURCES))
@@ -78,6 +79,13 @@ efivar : LIBS=efivar dl
 efivar-static : efivar.c $(patsubst %.o,%.static.o,$(LIBEFIVAR_OBJECTS))
 efivar-static : | $(GENERATED_SOURCES)
 efivar-static : LIBS=dl
+
+amp_fwupgrade : amp_fwupgrade.c | libefivar.so
+amp_fwupgrade : LIBS=efivar dl
+
+amp_fwupgrade-static : amp_fwupgrade.c $(patsubst %.o,%.static.o,$(LIBEFIVAR_OBJECTS))
+amp_fwupgrade-static : | $(GENERATED_SOURCES)
+amp_fwupgrade-static : LIBS=dl
 
 libefiboot.a : $(patsubst %.o,%.static.o,$(LIBEFIBOOT_OBJECTS))
 
