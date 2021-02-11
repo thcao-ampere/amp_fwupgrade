@@ -29,6 +29,9 @@ extern int optind, opterr, optopt;
 
 #include "efivar.h"
 
+#define VER_MAJOR	1
+#define VER_MINOR	0
+
 #define ACTION_USAGE		0x00
 #define ACTION_UPGRADE		0x01
 
@@ -232,10 +235,25 @@ usage(int ret)
 		"  -s, --scp=<file>                Upgrade SCP from <file>\n"
 		"Help options:\n"
 		"  -?, --help                      Show this help message\n"
-		"      --usage                     Display brief usage message\n",
+		"      --usage                     Display brief usage message\n"
+		"      --version                   Display version and copyright information\n",
 		program_invocation_short_name);
 	exit(ret);
 }
+
+static void __attribute__((__noreturn__))
+	show_version(int ret)
+{
+    FILE *out = ret == 0 ? stdout : stderr;
+    fprintf(out,
+        "%s (Ampere Firmware Upgrade) version %d.%d\n\n"
+        "Copyright 2012 Red Hat, Inc.\n"
+        "Copyright 2021 Ampere Computing LLC.\n"
+        "SPDX-License-Identifier: LGPL-2.1-or-later.\n",
+		program_invocation_short_name, VER_MAJOR, VER_MINOR);
+        exit(ret);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -246,12 +264,16 @@ int main(int argc, char *argv[])
 	size_t data_size = 0;
 	char *infile = NULL;
 	char *name = NULL;
-	char *sopts = "a:c:u:s:v?";
+	char *sopts = "a:c:u:s:v?V";
 	struct option lopts[] = {
 		{"fullfw", required_argument, 0, 'a'},
 		{"uefiandcfg", required_argument, 0, 'c'},
 		{"uefi", required_argument, 0, 'u'},
 		{"scp", required_argument, 0, 's'},
+		{"help", no_argument, 0, '?'},
+		{"usage", no_argument, 0, 0},
+               {"verbose", no_argument, 0, 'v'},
+               {"version", no_argument, 0, 'V'},
 		{0, 0, 0, 0}
 	};
 
@@ -279,6 +301,9 @@ int main(int argc, char *argv[])
 				break;
 			case 'v':
 				verbose += 1;
+				break;
+			case 'V':
+				show_version(EXIT_SUCCESS);
 				break;
 			case '?':
 				usage(EXIT_SUCCESS);
