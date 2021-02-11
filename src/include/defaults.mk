@@ -25,7 +25,7 @@ DEBUGINFO ?= -g3
 WARNINGS_GCC ?=
 WARNINGS_CCC_ANALYZER ?= $(WARNINGS_GCC)
 WARNINGS ?= -Wall -Wextra $(call family,WARNINGS)
-ERRORS ?= -Werror $(call family,ERRORS)
+#ERRORS ?= -Werror $(call family,ERRORS)
 CPPFLAGS ?=
 override _CPPFLAGS := $(CPPFLAGS)
 override CPPFLAGS = $(_CPPFLAGS) -DLIBEFIVAR_VERSION=$(VERSION) \
