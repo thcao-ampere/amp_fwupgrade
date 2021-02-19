@@ -37,10 +37,10 @@ extern int optind, opterr, optopt;
 
 static int verbose = 0;
 static char fwupgrade_guid[] = {"38b9ed29-d7c6-4bf4-9678-9da058bd2e99"};
-static char full_fw_name[] = {"AmpUpgradeATFUEFIRequest"};
-static char uefi_fw_name[] = {"AmpUpgradeEFIRequest"};
-static char ueficfg_fw_name[] = {"AmpUpgradeCFGUEFIRequest"};
-static char scp_fw_name[] = {"AmpUpgradeSCPRequest"};
+static char full_fw_name[] = {"UpgradeATFUEFIRequest"};
+static char uefi_fw_name[] = {"UpgradeUEFIRequest"};
+static char ueficfg_fw_name[] = {"UpgradeCFGUEFIRequest"};
+static char scp_fw_name[] = {"UpgradeSCPRequest"};
 
 static int
 parse_status(char *data, char **str_left, char **str_right)
