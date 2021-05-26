@@ -76,7 +76,7 @@ static void poll_status(const char *name)
 		return;
 
 	do {
-		sleep(1);
+		usleep(50000); /* Sleep 50 ms */
 		rc = efi_get_variable(guid, name, (uint8_t **)&str_status, &str_status_size,
 				&attributes);
 		if (rc < 0) {
@@ -124,8 +124,10 @@ static void poll_status(const char *name)
 			}
 			fflush(stdout);
 		} else {
-			if (!strcmp(str_right, "SUCCESS"))
-				fprintf(stdout, "\nUpgraded %s succesfully\n", str_left);
+			if (!strcmp(str_right, "SUCCESS")) {
+				fprintf(stdout, "\b\b\b100%%\n");
+				fprintf(stdout, "Upgraded %s succesfully\n", str_left);
+			}
 			else
 				fprintf(stderr, "\nError while upgrading %s with status %s\n", str_left, str_right);
 			free(str_status);
@@ -147,6 +149,7 @@ start_fwupgrade(const char *name, void *data, size_t data_size)
 	char *str_left, *str_right;
 	int rc;
 
+	fprintf(stdout, "amp_fwupgrade: Initializing\n");
 	rc = text_to_guid(fwupgrade_guid, &guid);
 	if (rc < 0)
 		return;
