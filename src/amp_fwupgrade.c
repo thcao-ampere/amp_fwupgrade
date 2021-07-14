@@ -41,6 +41,9 @@ static char full_fw_name[] = {"UpgradeATFUEFIRequest"};
 static char uefi_fw_name[] = {"UpgradeUEFIRequest"};
 static char ueficfg_fw_name[] = {"UpgradeCFGUEFIRequest"};
 static char scp_fw_name[] = {"UpgradeSCPRequest"};
+static char single_full_flash_name[] = {"UpgradeSingleImageFullFlashRequest"};
+static char single_fw_only_name[] = {"UpgradeSingleImageFWOnlyRequest"};
+static char single_clear_setting_name[] = {"UpgradeSingleImageClearSettingRequest"};
 
 static int
 parse_status(char *data, char **str_left, char **str_right)
@@ -236,6 +239,10 @@ usage(int ret)
 		"  -c, --uefiandcfg=<file>         Upgrade only UEFI and board settings from <file>\n"
 		"  -u, --uefi=<file>               Upgrade only UEFI from <file>\n"
 		"  -s, --scp=<file>                Upgrade SCP from <file>\n"
+		"  [-F/-f/-C] <file>               Upgrade firmware from single <file> with the following options\n"
+		"                                    -F: Full flash\n"
+		"                                    -f: Only ATF and UEFI be flashed\n"
+		"                                    -C: Only erase FW setting\n"
 		"Help options:\n"
 		"  -?, --help                      Show this help message\n"
 		"      --usage                     Display brief usage message\n"
@@ -267,7 +274,7 @@ int main(int argc, char *argv[])
 	size_t data_size = 0;
 	char *infile = NULL;
 	char *name = NULL;
-	char *sopts = "a:c:u:s:v?V";
+	char *sopts = "a:c:u:s:f:F:C:v?V";
 	struct option lopts[] = {
 		{"fullfw", required_argument, 0, 'a'},
 		{"uefiandcfg", required_argument, 0, 'c'},
@@ -275,8 +282,8 @@ int main(int argc, char *argv[])
 		{"scp", required_argument, 0, 's'},
 		{"help", no_argument, 0, '?'},
 		{"usage", no_argument, 0, 0},
-               {"verbose", no_argument, 0, 'v'},
-               {"version", no_argument, 0, 'V'},
+		{"verbose", no_argument, 0, 'v'},
+		{"version", no_argument, 0, 'V'},
 		{0, 0, 0, 0}
 	};
 
@@ -300,6 +307,21 @@ int main(int argc, char *argv[])
 			case 's':
 				infile = optarg;
 				name = scp_fw_name;
+				action |= ACTION_UPGRADE;
+				break;
+			case 'F':
+				infile = optarg;
+				name = single_full_flash_name;
+				action |= ACTION_UPGRADE;
+				break;
+			case 'f':
+				infile = optarg;
+				name = single_fw_only_name;
+				action |= ACTION_UPGRADE;
+				break;
+			case 'C':
+				infile = optarg;
+				name = single_clear_setting_name;
 				action |= ACTION_UPGRADE;
 				break;
 			case 'v':
