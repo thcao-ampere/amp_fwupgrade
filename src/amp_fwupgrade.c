@@ -30,7 +30,7 @@ extern int optind, opterr, optopt;
 #include "efivar.h"
 
 #define VER_MAJOR	1
-#define VER_MINOR	2
+#define VER_MINOR	3
 
 #define ACTION_USAGE		0x00
 #define ACTION_UPGRADE		0x01
@@ -234,20 +234,21 @@ usage(int ret)
 {
 	FILE *out = ret == 0 ? stdout : stderr;
 	fprintf(out,
+		"Ampere Firmware Upgrade version %d.%d\n\n"
 		"Usage: %s [OPTION...]\n"
-		"  -a, --fullfw=<file>             Upgrade full firmware (excluding SCP) from <file>\n"
-		"  -c, --uefiandcfg=<file>         Upgrade only UEFI and board settings from <file>\n"
-		"  -u, --uefi=<file>               Upgrade only UEFI from <file>\n"
-		"  -s, --scp=<file>                Upgrade SCP from <file>\n"
-		"  [-F/-f/-C] <file>               Upgrade firmware from single <file> with the following options\n"
-		"                                    -F: Full flash\n"
-		"                                    -f: Only ATF and UEFI be flashed\n"
-		"                                    -C: Only erase FW setting\n"
+		"  -a, --allfw=<file>                  Upgrade all firmware (excluding SCP) from <file>\n"
+		"  -c, --ueficfg=<file>                Upgrade only UEFI and board settings from <file>\n"
+		"  -u, --uefi=<file>                   Upgrade only UEFI from <file>\n"
+		"  -s, --scp=<file>                    Upgrade SCP from <file>\n"
+		"  [-F/-f/-C] <file>                   Upgrade firmware from single <file> with the following options\n"
+		"                   , --fullfw=<file>       -F: Full flash\n"
+		"                   , --atfuefi=<file>      -f: Only ATF and UEFI be flashed\n"
+		"                   , --clear=<file>        -C: Only erase FW setting\n"
 		"Help options:\n"
-		"  -?, --help                      Show this help message\n"
-		"      --usage                     Display brief usage message\n"
-		"      --version                   Display version and copyright information\n",
-		program_invocation_short_name);
+		"  -?, --help                          Show this help message\n"
+		"      --usage                         Display brief usage message\n"
+		"      --version                       Display version and copyright information\n",
+		VER_MAJOR, VER_MINOR, program_invocation_short_name);
 	exit(ret);
 }
 
@@ -276,10 +277,13 @@ int main(int argc, char *argv[])
 	char *name = NULL;
 	char *sopts = "a:c:u:s:f:F:C:v?V";
 	struct option lopts[] = {
-		{"fullfw", required_argument, 0, 'a'},
-		{"uefiandcfg", required_argument, 0, 'c'},
+		{"allfw", required_argument, 0, 'a'},
+		{"ueficfg", required_argument, 0, 'c'},
 		{"uefi", required_argument, 0, 'u'},
 		{"scp", required_argument, 0, 's'},
+		{"fullfw", required_argument, 0, 'F'},
+		{"atfuefi", required_argument, 0, 'f'},
+		{"clear", required_argument, 0, 'C'},
 		{"help", no_argument, 0, '?'},
 		{"usage", no_argument, 0, 0},
 		{"verbose", no_argument, 0, 'v'},
