@@ -30,7 +30,7 @@ extern int optind, opterr, optopt;
 #include "efivar.h"
 
 #define VER_MAJOR	1
-#define VER_MINOR	0
+#define VER_MINOR	2
 
 #define ACTION_USAGE		0x00
 #define ACTION_UPGRADE		0x01
