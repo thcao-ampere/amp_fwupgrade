@@ -44,6 +44,8 @@ static char scp_fw_name[] = {"UpgradeSCPRequest"};
 static char single_full_flash_name[] = {"UpgradeSingleImageFullFlashRequest"};
 static char single_fw_only_name[] = {"UpgradeSingleImageFWOnlyRequest"};
 static char single_clear_setting_name[] = {"UpgradeSingleImageClearSettingRequest"};
+static char setup_load_offset_name[] = "UpgradeSetUploadOffset";
+static char continue_upload_name[] = "UpgradeContinueUpload";
 
 static int
 parse_status(char *data, char **str_left, char **str_right)
@@ -145,12 +147,15 @@ static void poll_status(const char *name)
 static void
 start_fwupgrade(const char *name, void *data, size_t data_size)
 {
+	#define MAX_XFER_SIZE		(1024 * 1024)
 	size_t str_status_size = 0;
 	uint32_t attributes = 0;
 	efi_guid_t guid;
 	char *str_status = NULL;
 	char *str_left, *str_right;
 	int rc;
+	uint32_t up_loaded;
+	uint32_t xfer_size;
 
 	fprintf(stdout, "amp_fwupgrade: Initializing\n");
 	rc = text_to_guid(fwupgrade_guid, &guid);
@@ -176,8 +181,36 @@ start_fwupgrade(const char *name, void *data, size_t data_size)
 		}
 	}
 
+	if (data_size > MAX_XFER_SIZE) {
+		up_loaded = 0;
+		while (up_loaded < data_size) {
+			rc = efi_set_variable(guid, setup_load_offset_name,
+						(uint8_t *) &up_loaded, sizeof(up_loaded),
+						EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS, 0644);
+			if (rc < 0) {
+				fprintf(stderr, "amp_fwupgrade(%d): %m\n", __LINE__);
+				exit(1);
+			}
+			xfer_size = data_size - up_loaded;
+			if (xfer_size > MAX_XFER_SIZE)
+				xfer_size = MAX_XFER_SIZE;
+			rc = efi_set_variable(guid, continue_upload_name,
+					(uint8_t *) data + up_loaded, xfer_size,
+					EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS, 0644);
+			if (rc < 0) {
+				fprintf(stderr, "amp_fwupgrade(%d): %m\n", __LINE__);
+				exit(1);
+			}
+			up_loaded += xfer_size;
+		}
+	}
+
+	if (data_size > MAX_XFER_SIZE)
+		xfer_size = MAX_XFER_SIZE;
+	else
+		xfer_size = data_size;
 	rc = efi_set_variable(guid, name,
-				data, data_size,
+				data, xfer_size,
 				EFI_VARIABLE_NON_VOLATILE | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS, 0644);
 
 	free(str_status);
