@@ -30,7 +30,7 @@ extern int optind, opterr, optopt;
 #include "efivar.h"
 
 #define VER_MAJOR	1
-#define VER_MINOR	3
+#define VER_MINOR	4
 
 #define ACTION_USAGE		0x00
 #define ACTION_UPGRADE		0x01
@@ -267,7 +267,13 @@ usage(int ret)
 {
 	FILE *out = ret == 0 ? stdout : stderr;
 	fprintf(out,
-		"Ampere Firmware Upgrade version %d.%d\n\n"
+		"                 ▄██▄\n"
+		"                ▄█  █▄\n"
+		"               ▄█    █▄\n"
+		"           ▄▄▄▄█  ▄▄▄ █▄\n"
+		"       ▄█▀▀▀ ▄█      ▀██▄\n"
+		"     ▄█▀    ▄█         ▀█▄\n"
+		"A M P E R E   F I R M W A R E   U P G R A D E   [v%d.%d]\n\n"
 		"Usage: %s [OPTION...]\n"
 		"  -a, --allfw=<file>                  Upgrade all firmware (excluding SCP) from <file>\n"
 		"  -c, --ueficfg=<file>                Upgrade only UEFI and board settings from <file>\n"
